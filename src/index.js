@@ -49,7 +49,7 @@ const timezoneOptions = [
 ];
 
 
-const client = new Client({ intents: [GatewayIntentBits.Guilds] });
+const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages] });
 
 const commands = [];
 
