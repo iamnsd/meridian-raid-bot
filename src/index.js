@@ -49,7 +49,7 @@ const timezoneOptions = [
 ];
 
 
-const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages] });
+const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent, GatewayIntentBits.GuildMembers,] });
 
 const commands = [];
 
@@ -134,7 +134,7 @@ client.on('message', (message) => {
 
 async function main() {
   try {
-    client.login(TOKEN);
+    await client.login(TOKEN);
   } catch (err) {
     console.log(err);
   }
