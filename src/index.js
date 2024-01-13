@@ -12,15 +12,42 @@ import {
 
 const TOKEN = process.env.BOT_TOKEN;
 const CLIENT_ID = process.env.CLIENT_ID;
-const GUILD_ID = '1074328033395216464';
 
-const ROLES = {
-  COURSE1: '1074716801432297592',
-  COURSE2: '',
-  COURSE3: '',
-  COURSE4: '',
-  COURSE5: '',
-};
+const prefix = '!'; // Выберите префикс для команд бота
+
+const questions = [
+  'Привет! Какое у тебя имя персонажа?',
+  'Выбери уровень экипировки:',
+  'В каком часовом поясе ты находишься?',
+  'Укажи временной интервал активности (в формате HH:mm - HH:mm):'
+];
+
+const answers = {};
+
+let currentQuestion = 0;
+let isSurveyActive = false;
+
+const levelOptions = [
+  '< 1490',
+  '1490-1500',
+  '1510-1540',
+  '1540-1560',
+  '1560-1580',
+  '> 1580'
+];
+
+const timezoneOptions = [
+  'МСК-4',
+  'МСК-3',
+  'МСК-2',
+  'МСК-1',
+  'МСК',
+  'МСК+1',
+  'МСК+2',
+  'МСК+3',
+  'МСК+4'
+];
+
 
 const client = new Client({ intents: [GatewayIntentBits.Guilds] });
 
@@ -29,83 +56,71 @@ const commands = [];
 client.on('ready', async () => {
   console.log('Bot is online');
 
-   const channel = client.channels.cache.get('1074328034070503487');
-   console.log(channel);
-   channel.send({
-     content: 'Выберите один или несколько интересующих курсов',
-     components: [
-       new ActionRowBuilder().setComponents(
-         new ButtonBuilder()
-           .setCustomId('course1')
-		   .setEmoji('🐧')
-           .setLabel('Linux курс "exec-rm"')
-           .setStyle(ButtonStyle.Success),
-         new ButtonBuilder()
-           .setCustomId('course2')
-           .setLabel('Основы сетей')
-           .setStyle(ButtonStyle.Secondary)
-		   .setDisabled(true),
-//         new ButtonBuilder()
-//           .setCustomId('course3')
-//           .setLabel('Курс 3')
-//           .setStyle(ButtonStyle.Primary),
-//         new ButtonBuilder()
-//           .setCustomId('course4')
-//           .setLabel('Курс 4')
-//           .setStyle(ButtonStyle.Primary),
-//         new ButtonBuilder()
-//           .setCustomId('course5')
-//           .setLabel('Курс 5')
-//           .setStyle(ButtonStyle.Primary)
-       ),
-     ],
-   });
 });
 
-client.on('interactionCreate', async (interaction) => {
-  if (interaction.isButton()) {
-    const role = interaction.guild.roles.cache.get(
-      ROLES[interaction.customId.toUpperCase()] 
-    );
+client.on('message', (message) => {
+  if (message.author.bot) return;
 
-    if (!role)
-      return interaction.reply({ content: 'Для выбранного курса не найдена соответствующая роль Discord сервера', ephemeral: true });
+  if (message.content.startsWith(prefix)) {
+    const command = message.content.slice(prefix.length).trim();
 
-    const hasRole = interaction.member.roles.cache.has(role.id);
-    console.log(hasRole);
+    if (command === 'raid' && !isSurveyActive) {
+      // Начало анкетирования по команде !raid
+      isSurveyActive = true;
+      currentQuestion = 0;
 
-    if (hasRole)
-      return interaction.member.roles
-        .remove(role)
-        .then((member) =>
-          interaction.reply({
-            content: `Роль ${role} удалена для пользователя ${member}`,
-            ephemeral: true,
-          })
-        )
-        .catch((err) => {
-          console.log(err);
-          return interaction.reply({
-            content: `Упс, что то пошло не так. Роль ${role} не была удалена у пользователя ${member}`,
-            ephemeral: true,
-          });
-        });
-    else
-      return interaction.member.roles
-        .add(role)
-        .then((member) =>
-          interaction.reply({
-            content: `В соответствии с выбранным курсом роль ${role} была назначена пользователю ${member}`,
-            ephemeral: true,
-          })
-        )
-        .catch((err) => {
-          console.log(err);
-          return interaction.reply({
-            content: `Упс, что то пошло не так. Роль ${role} не была удалена у пользователя ${member}`,
-            ephemeral: true,
-          });
-        });
+      // Отправляем первый вопрос
+      message.author.send(questions[currentQuestion]);
+    }
+    return;
+  }
+
+  if (isSurveyActive && currentQuestion < questions.length) {
+    // Обработка ответов на вопросы
+    const answer = message.content;
+
+    switch (currentQuestion) {
+      case 1:
+        if (!levelOptions.includes(answer)) {
+          message.author.send('Пожалуйста, выбери один из вариантов ответа.');
+          return;
+        }
+        break;
+      case 2:
+        if (!timezoneOptions.includes(answer)) {
+          message.author.send('Пожалуйста, выбери один из вариантов ответа.');
+          return;
+        }
+        break;
+      case 3:
+        // Проверка формата времени (пример: 10:00 - 12:00)
+        const timeFormat = /^([01]\d|2[0-3]):([0-5]\d) - ([01]\d|2[0-3]):([0-5]\d)$/;
+        if (!timeFormat.test(answer)) {
+          message.author.send('Пожалуйста, укажи временной интервал в правильном формате (HH:mm - HH:mm).');
+          return;
+        }
+        break;
+    }
+
+    // Сохранение ответа
+    answers[questions[currentQuestion]] = answer;
+    currentQuestion++;
+
+    // Если еще есть вопросы, отправляем следующий
+    if (currentQuestion < questions.length) {
+      message.author.send(questions[currentQuestion]);
+    } else {
+      // Если вопросы закончились, выводим собранную информацию
+      message.author.send('Спасибо за предоставленную информацию!');
+      Object.entries(answers).forEach(([question, answer]) => {
+        message.author.send(`${question}: ${answer}`);
+      });
+
+      // Сброс данных после завершения
+      isSurveyActive = false;
+      currentQuestion = 0;
+      answers = {};
+    }
   }
 });
 
