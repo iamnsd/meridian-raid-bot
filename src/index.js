@@ -58,7 +58,7 @@ client.on('ready', async () => {
 
 });
 
-client.on('message', (message) => {
+client.on('messageCreate', (message) => {
 	
   console.log(`Received message: ${message.content}`);
   
