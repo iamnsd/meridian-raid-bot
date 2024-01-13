@@ -88,16 +88,56 @@ client.on('messageCreate', (message) => {
 
     switch (currentQuestion) {
       case 1:
-        if (!levelOptions.includes(answer)) {
-          message.author.send('Пожалуйста, выбери один из вариантов ответа.');
-          return;
-        }
+        // Обработка вариантов ответа для уровня экипировки
+        const row = new ActionRowBuilder()
+          .addComponents(
+            new ButtonBuilder()
+              .setCustomId('level_l_1490')
+              .setLabel('< 1490')
+              .setStyle(ButtonStyle.PRIMARY),
+            new ButtonBuilder()
+              .setCustomId('level_1490_1500')
+              .setLabel('1490-1500')
+              .setStyle(ButtonStyle.PRIMARY),
+            new ButtonBuilder()
+              .setCustomId('level_1510-1540')
+              .setLabel('1510-1540')
+              .setStyle(ButtonStyle.PRIMARY),
+            new ButtonBuilder()
+              .setCustomId('level_1540-1560')
+              .setLabel('1540-1560')
+              .setStyle(ButtonStyle.PRIMARY),	
+            new ButtonBuilder()
+              .setCustomId('level_1560-1580')
+              .setLabel('1560-1580')
+              .setStyle(ButtonStyle.PRIMARY),
+            new ButtonBuilder()
+              .setCustomId('level_g_1580')
+              .setLabel('> 1580')
+              .setStyle(ButtonStyle.PRIMARY)				  
+          );
+
+        message.author.send({
+          content: 'Выбери уровень экипировки:',
+          components: [row],
+        });
         break;
+
       case 2:
-        if (!timezoneOptions.includes(answer)) {
-          message.author.send('Пожалуйста, выбери один из вариантов ответа.');
-          return;
-        }
+        // Обработка вариантов ответа для часового пояса
+        const timezoneRow = new ActionRowBuilder()
+          .addComponents(
+            new ButtonBuilder()
+              .setCustomId('timezone_MSK_4')
+              .setLabel('МСК-4')
+              .setStyle(ButtonStyle.PRIMARY)
+            // Добавьте остальные кнопки с часовыми поясами
+          );
+
+        message.author.send({
+          content: 'В каком часовом поясе ты находишься?',
+          components: [timezoneRow],
+        });
         break;
       case 3:
         // Проверка формата времени (пример: 10:00 - 12:00)
@@ -130,6 +170,19 @@ client.on('messageCreate', (message) => {
     }
   }
   console.log('No action taken for this message.');
+});
+
+client.on('interactionCreate', async (interaction) => {
+  if (!interaction.isButton()) return;
+
+  const { customId, user } = interaction;
+  const answer = interaction.customId;
+
+  // Обработайте ответ, например, сохраните его в объект answers
+  answers['Выбери уровень экипировки:'] = answer;
+
+  // Отправьте следующий вопрос
+  message.author.send('В каком часовом поясе ты находишься?');
 });
 
 async function main() {
