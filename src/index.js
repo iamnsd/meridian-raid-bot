@@ -59,6 +59,9 @@ client.on('ready', async () => {
 });
 
 client.on('message', (message) => {
+	
+  console.log(`Received message: ${message.content}`);
+  
   if (message.author.bot) return;
 
   if (message.content.startsWith(prefix)) {
