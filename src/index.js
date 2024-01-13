@@ -87,65 +87,12 @@ client.on('messageCreate', (message) => {
     const answer = message.content;
 
     switch (currentQuestion) {
-      case 1:
-        // Обработка вариантов ответа для уровня экипировки
-        const row = new ActionRowBuilder()
-          .addComponents(
-            new ButtonBuilder()
-              .setCustomId('level_l_1490')
-              .setLabel('< 1490')
-              .setStyle(ButtonStyle.PRIMARY),
-            new ButtonBuilder()
-              .setCustomId('level_1490_1500')
-              .setLabel('1490-1500')
-              .setStyle(ButtonStyle.PRIMARY),
-            new ButtonBuilder()
-              .setCustomId('level_1510-1540')
-              .setLabel('1510-1540')
-              .setStyle(ButtonStyle.PRIMARY),
-            new ButtonBuilder()
-              .setCustomId('level_1540-1560')
-              .setLabel('1540-1560')
-              .setStyle(ButtonStyle.PRIMARY),	
-            new ButtonBuilder()
-              .setCustomId('level_1560-1580')
-              .setLabel('1560-1580')
-              .setStyle(ButtonStyle.PRIMARY),
-            new ButtonBuilder()
-              .setCustomId('level_g_1580')
-              .setLabel('> 1580')
-              .setStyle(ButtonStyle.PRIMARY)				  
-          );
-
-        message.author.send({
-          content: 'Выбери уровень экипировки:',
-          components: [row],
-        });
+      case 0:
+        // Обработка имени персонажа
         break;
+      // Добавьте обработку других вопросов
 
-      case 2:
-        // Обработка вариантов ответа для часового пояса
-        const timezoneRow = new ActionRowBuilder()
-          .addComponents(
-            new ButtonBuilder()
-              .setCustomId('timezone_MSK_4')
-              .setLabel('МСК-4')
-              .setStyle(ButtonStyle.PRIMARY)
-            // Добавьте остальные кнопки с часовыми поясами
-          );
-
-        message.author.send({
-          content: 'В каком часовом поясе ты находишься?',
-          components: [timezoneRow],
-        });
-        break;
-      case 3:
-        // Проверка формата времени (пример: 10:00 - 12:00)
-        const timeFormat = /^([01]\d|2[0-3]):([0-5]\d) - ([01]\d|2[0-3]):([0-5]\d)$/;
-        if (!timeFormat.test(answer)) {
-          message.author.send('Пожалуйста, укажи временной интервал в правильном формате (HH:mm - HH:mm).');
-          return;
-        }
+      default:
         break;
     }
 
@@ -153,14 +100,22 @@ client.on('messageCreate', (message) => {
     answers[questions[currentQuestion]] = answer;
     currentQuestion++;
 
-    // Если еще есть вопросы, отправляем следующий
+    // Если еще есть вопросы, отправляем следующий вопрос в личные сообщения
     if (currentQuestion < questions.length) {
-      message.author.send(questions[currentQuestion]);
+      const dmChannel = await message.author.createDM();
+      dmChannel.send(questions[currentQuestion]);
     } else {
-      // Если вопросы закончились, выводим собранную информацию
-      message.author.send('Спасибо за предоставленную информацию!');
+      // Если вопросы закончились, выводим собранную информацию в текстовый канал
+      message.channel.send('Спасибо за предоставленную информацию!');
       Object.entries(answers).forEach(([question, answer]) => {
-        message.author.send(`${question}: ${answer}`);
+        message.channel.send(`${question}: ${answer}`);
+      });
+
+      // Отправляем информацию также в личный канал
+      const dmChannel = await message.author.createDM();
+      dmChannel.send('Спасибо за предоставленную информацию!');
+      Object.entries(answers).forEach(([question, answer]) => {
+        dmChannel.send(`${question}: ${answer}`);
       });
 
       // Сброс данных после завершения
@@ -182,7 +137,8 @@ client.on('interactionCreate', async (interaction) => {
   answers['Выбери уровень экипировки:'] = answer;
 
   // Отправьте следующий вопрос
-  message.author.send('В каком часовом поясе ты находишься?');
+  await message.author.send('В каком часовом поясе ты находишься?');
+  message.author.awaitMessageComponent({ filter, time: 60000 }); // Ожидание ответа пользователя
 });
 
 async function main() {
