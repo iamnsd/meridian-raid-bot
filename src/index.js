@@ -65,9 +65,12 @@ client.on('message', (message) => {
   if (message.author.bot) return;
 
   if (message.content.startsWith(prefix)) {
+	console.log('Message starts with prefix.');
     const command = message.content.slice(prefix.length).trim();
+	console.log(`Command: ${command}`);
 
     if (command === 'raid' && !isSurveyActive) {
+	  console.log('Starting survey.');
       // Начало анкетирования по команде !raid
       isSurveyActive = true;
       currentQuestion = 0;
@@ -79,6 +82,7 @@ client.on('message', (message) => {
   }
 
   if (isSurveyActive && currentQuestion < questions.length) {
+	console.log('Survey is active, processing question.');
     // Обработка ответов на вопросы
     const answer = message.content;
 
@@ -125,6 +129,7 @@ client.on('message', (message) => {
       answers = {};
     }
   }
+  console.log('No action taken for this message.');
 });
 
 async function main() {
