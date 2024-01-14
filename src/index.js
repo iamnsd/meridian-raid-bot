@@ -58,31 +58,33 @@ client.on('ready', async () => {
 
 });
 
-client.on('messageCreate', (message) => {
-	
+client.on('messageCreate', async (message) => {
   console.log(`Received message: ${message.content}`);
-  
+
   if (message.author.bot) return;
 
   if (message.content.startsWith(prefix)) {
-	console.log('Message starts with prefix.');
+    console.log('Message starts with prefix.');
     const command = message.content.slice(prefix.length).trim();
-	console.log(`Command: ${command}`);
+    console.log(`Command: ${command}`);
 
     if (command === 'raid' && !isSurveyActive) {
-	  console.log('Starting survey.');
+      console.log('Starting survey.');
       // Начало анкетирования по команде !raid
       isSurveyActive = true;
       currentQuestion = 0;
 
-      // Отправляем первый вопрос
-      message.author.send(questions[currentQuestion]);
+      // Отправляем первый вопрос в личные сообщения
+      const dmChannel = await message.author.createDM();
+      dmChannel.send(questions[currentQuestion]).catch((err) => console.error(err));
     }
     return;
   }
 
-  if (isSurveyActive && currentQuestion < questions.length) {
-	console.log('Survey is active, processing question.');
+  // Проверяем, является ли сообщение ответом на текущий вопрос в опросе
+  if (isSurveyActive && currentQuestion < questions.length && message.author.id === message.author.id) {
+    console.log('Survey is active, processing question.');
+
     // Обработка ответов на вопросы
     const answer = message.content;
 
@@ -103,7 +105,7 @@ client.on('messageCreate', (message) => {
     // Если еще есть вопросы, отправляем следующий вопрос в личные сообщения
     if (currentQuestion < questions.length) {
       const dmChannel = await message.author.createDM();
-      dmChannel.send(questions[currentQuestion]);
+      dmChannel.send(questions[currentQuestion]).catch((err) => console.error(err));
     } else {
       // Если вопросы закончились, выводим собранную информацию в текстовый канал
       message.channel.send('Спасибо за предоставленную информацию!');
