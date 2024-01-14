@@ -17,13 +17,9 @@ const prefix = '!'; // Выберите префикс для команд бо�
 
 const questions = [
   'Привет! Какое у тебя имя персонажа?',
-  'Выбери уровень экипировки:',
-  'В каком часовом поясе ты находишься?',
-  'Укажи временной интервал активности (в формате HH:mm - HH:mm):'
 ];
 
-const answers = {};
-
+let answers = {};
 let currentQuestion = 0;
 let isSurveyActive = false;
 
@@ -127,20 +123,6 @@ client.on('messageCreate', async (message) => {
     }
   }
   console.log('No action taken for this message.');
-});
-
-client.on('interactionCreate', async (interaction) => {
-  if (!interaction.isButton()) return;
-
-  const { customId, user } = interaction;
-  const answer = interaction.customId;
-
-  // Обработайте ответ, например, сохраните его в объект answers
-  answers['Выбери уровень экипировки:'] = answer;
-
-  // Отправьте следующий вопрос
-  await message.author.send('В каком часовом поясе ты находишься?');
-  message.author.awaitMessageComponent({ filter, time: 60000 }); // Ожидание ответа пользователя
 });
 
 async function main() {
