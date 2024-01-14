@@ -104,10 +104,10 @@ client.on('messageCreate', async (message) => {
       dmChannel.send(questions[currentQuestion]).catch((err) => console.error(err));
     } else {
       // Если вопросы закончились, выводим собранную информацию в текстовый канал
-      message.channel.send('Спасибо за предоставленную информацию!');
-      Object.entries(answers).forEach(([question, answer]) => {
-        message.channel.send(`${question}: ${answer}`);
-      });
+      // message.channel.send('Спасибо за предоставленную информацию!');
+      // Object.entries(answers).forEach(([question, answer]) => {
+      //  message.channel.send(`${question}: ${answer}`);
+      // });
 
       // Отправляем информацию также в личный канал
       const dmChannel = await message.author.createDM();
@@ -124,6 +124,14 @@ client.on('messageCreate', async (message) => {
   }
   console.log('No action taken for this message.');
 });
+
+// Добавим обработчик для личных сообщений
+client.on('messageCreate', async (message) => {
+  if (!message.guild) {
+    // Обработка личных сообщений
+    console.log(`Received DM: ${message.content}`);
+    // Добавьте здесь код для обработки личных сообщений, если это необходимо
+  }
 
 async function main() {
   try {
