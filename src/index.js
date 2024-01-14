@@ -59,11 +59,9 @@ client.on('messageCreate', async (message) => {
 
   if (message.author.bot) return;
 
-  // Проверим, является ли сообщение командой в общем канале
+  // Проверяем, является ли сообщение командой !raid
   if (message.content.startsWith(prefix) && !message.guild) {
-    console.log('Message starts with prefix in DMs.');
     const command = message.content.slice(prefix.length).trim();
-    console.log(`Command: ${command}`);
 
     if (command === 'raid' && !isSurveyActive) {
       console.log('Starting survey in DMs.');
@@ -124,11 +122,11 @@ client.on('messageCreate', async (message) => {
 
 // Добавим обработчик для личных сообщений
 client.on('messageCreate', async (message) => {
-  if (!message.guild) {
-    // Обработка личных сообщений
-    console.log(`Received DM: ${message.content}`);
-    // Добавьте здесь код для обработки личных сообщений, если это необходимо
-  }
+  if (message.guild) return; // Игнорируем сообщения из серверов
+
+  // Обработка личных сообщений
+  console.log(`Received DM: ${message.content}`);
+  // Добавьте здесь код для обработки личных сообщений, если это необходимо
 });
 
 async function main() {
