@@ -132,6 +132,7 @@ client.on('messageCreate', async (message) => {
     console.log(`Received DM: ${message.content}`);
     // Добавьте здесь код для обработки личных сообщений, если это необходимо
   }
+});
 
 async function main() {
   try {
