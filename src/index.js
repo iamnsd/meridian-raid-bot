@@ -59,13 +59,14 @@ client.on('messageCreate', async (message) => {
 
   if (message.author.bot) return;
 
-  if (message.content.startsWith(prefix)) {
-    console.log('Message starts with prefix.');
+  // Проверим, является ли сообщение командой в общем канале
+  if (message.content.startsWith(prefix) && !message.guild) {
+    console.log('Message starts with prefix in DMs.');
     const command = message.content.slice(prefix.length).trim();
     console.log(`Command: ${command}`);
 
     if (command === 'raid' && !isSurveyActive) {
-      console.log('Starting survey.');
+      console.log('Starting survey in DMs.');
       // Начало анкетирования по команде !raid
       isSurveyActive = true;
       currentQuestion = 0;
@@ -103,11 +104,6 @@ client.on('messageCreate', async (message) => {
       const dmChannel = await message.author.createDM();
       dmChannel.send(questions[currentQuestion]).catch((err) => console.error(err));
     } else {
-      // Если вопросы закончились, выводим собранную информацию в текстовый канал
-      // message.channel.send('Спасибо за предоставленную информацию!');
-      // Object.entries(answers).forEach(([question, answer]) => {
-      //  message.channel.send(`${question}: ${answer}`);
-      // });
 
       // Отправляем информацию также в личный канал
       const dmChannel = await message.author.createDM();
@@ -122,6 +118,7 @@ client.on('messageCreate', async (message) => {
       answers = {};
     }
   }
+
   console.log('No action taken for this message.');
 });
 
